@@ -1,0 +1,8 @@
+2004-04-02 Vlad Seryakov vlad@crystalballinc.com
+
+        * memory leak and Ns_ZlibCompress/Uncompress functions
+
+2003-11-02 Vlad Seryakov vlad@crystalballinc.com
+
+        * added gzipfile command as suggested by mbryzek@fastmail.fm
+

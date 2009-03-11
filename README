@@ -1,0 +1,41 @@
+ZLib Module for NaviServer 3.x/4.0
+Release 1.1
+vlad@crystalballinc.com
+
+This is NaviServer module that implements Zlib interface.
+Allows compressing/uncompressing Tcl strings as well as gzip file support.
+
+/*--------------------------------------------------------------------*/
+
+Compiling and Installing
+
+To compile this driver, you'll need to have zlib library compiled 
+and installed, for RedHat systems zlib-devel package should be installed.
+
+Usage
+
+
+ nszlib.c -- Zlib API module
+
+  ns_zlib usage:
+
+    ns_zlib compress data
+      Returns compressed string
+
+    ns_zlib uncompress data
+       Uncompresses previously compressed string
+
+    ns_zlib gzip data
+      Returns compressed string in gzip format, string can be saved in
+      a file with extension .gz and gzip will be able to uncompress it
+    
+    ns_zlib gzipfile file
+      Compresses the specified file, creating a file with the
+      same name but a .gz suffix appened
+    
+    ns_zlib gunzip file
+       Uncompresses gzip file and returns text
+ 
+Authors
+     Vlad Seryakov vlad@crystalballinc.com
+
