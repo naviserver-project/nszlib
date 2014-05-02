@@ -56,7 +56,7 @@
 
 #include "zlib.h"
 
-#define VERSION "1.1"
+#define NSZLIB_VERSION "1.1"
 
 NS_EXPORT int Ns_ModuleVersion = 1;
 
@@ -68,7 +68,7 @@ unsigned char *Ns_ZlibUncompress(unsigned char *inbuf, unsigned long inlen, unsi
 
 NS_EXPORT int Ns_ModuleInit(char *hServer, char *hModule)
 {
-    Ns_Log(Notice, "nszlib: zlib module version %s started", VERSION);
+    Ns_Log(Notice, "nszlib: zlib module version %s started", NSZLIB_VERSION);
     Ns_TclRegisterTrace(hServer, NsZlibInterpInit, 0, NS_TCL_TRACE_CREATE);
     return NS_OK;
 }
@@ -84,7 +84,7 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj * CONST objv[]
 {
     int rc, inlen;
     unsigned char *inbuf, *outbuf;
-    unsigned long outlen, crc;
+    unsigned long outlen;
 
     if (objc < 3) {
         Tcl_AppendResult(interp, "wrong # args: should be \"", Tcl_GetString(objv[0]), " command args\"", NULL);
@@ -108,19 +108,21 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj * CONST objv[]
             Tcl_AppendResult(interp, "nszlib: uncompress failed", 0);
             return TCL_ERROR;
         }
-        Tcl_SetObjResult(interp, Tcl_NewStringObj(outbuf, (int) outlen));
+        Tcl_SetObjResult(interp, Tcl_NewStringObj((char*)outbuf, (int) outlen));
         ns_free(outbuf);
         return TCL_OK;
     }
 
     if (!strcmp("gzip", Tcl_GetString(objv[1]))) {
+        unsigned long crc;
+
         inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
         outlen = inlen * 1.1 + 30;
         outbuf = ns_malloc(outlen);
         outlen = outlen - 16;
         rc = compress2(outbuf + 8, &outlen, inbuf, inlen, 3);
         if (rc != Z_OK) {
-            sprintf(outbuf, "%d", rc);
+	    sprintf((char *) outbuf, "%d", rc);
             Tcl_AppendResult(interp, "nszlib: gzip failed ", outbuf, 0);
             ns_free(outbuf);
             return TCL_ERROR;
@@ -185,6 +187,7 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj * CONST objv[]
         if (!(gout = gzopen(Tcl_GetString(obj), "wb"))) {
             Tcl_AppendResult(interp, "nszlib: gzipfile: cannot create ", Tcl_GetString(obj), 0);
             Tcl_DecrRefCount(obj);
+	    fclose(fin);
             return TCL_ERROR;
         }
         for (;;) {
