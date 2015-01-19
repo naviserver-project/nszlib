@@ -60,7 +60,7 @@
 
 NS_EXPORT int Ns_ModuleVersion = 1;
 
-static int NsZlibInterpInit(Tcl_Interp *, void *);
+static Ns_TclTraceProc NsZlibInterpInit;
 static int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj * CONST objv[]);
 
 unsigned char *Ns_ZlibCompress(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
@@ -73,7 +73,7 @@ NS_EXPORT int Ns_ModuleInit(char *hServer, char *hModule)
     return NS_OK;
 }
 
-static int NsZlibInterpInit(Tcl_Interp * interp, void *context)
+static int NsZlibInterpInit(Tcl_Interp * interp, const void *context)
 {
     Tcl_CreateObjCommand(interp, "ns_zlib", ZlibCmd, NULL, NULL);
     return NS_OK;
