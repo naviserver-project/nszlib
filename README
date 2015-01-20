@@ -1,6 +1,7 @@
 ZLib Module for NaviServer 3.x/4.0
 Release 1.1
 vlad@crystalballinc.com
+neumann@wu.ac.at
 
 This is NaviServer module that implements Zlib interface.
 Allows compressing/uncompressing Tcl strings as well as gzip file support.
@@ -20,11 +21,17 @@ Usage
   ns_zlib usage:
 
     ns_zlib compress data
-      Returns compressed string
+      Returns compressed string (zlib-format compressed binary data)
+
+    ns_zlib deflate data
+      Returns deflated string (raw compressed binary data)
 
     ns_zlib uncompress data
        Uncompresses previously compressed string
 
+    ns_zlib inflate data
+       Uncompresses previously deflated string
+       
     ns_zlib gzip data
       Returns compressed string in gzip format, string can be saved in
       a file with extension .gz and gzip will be able to uncompress it
@@ -38,4 +45,5 @@ Usage
  
 Authors
      Vlad Seryakov vlad@crystalballinc.com
+     Gustaf Neumann neumann@wu.ac.at
 
