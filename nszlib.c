@@ -65,6 +65,7 @@ static int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj * CONST
 
 unsigned char *Ns_ZlibCompress(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
 unsigned char *Ns_ZlibUncompress(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
+unsigned char *Ns_ZlibDeflate(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
 
 NS_EXPORT int Ns_ModuleInit(char *hServer, char *hModule)
 {
@@ -100,6 +101,17 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj * CONST objv[]
         Tcl_SetObjResult(interp, Tcl_NewByteArrayObj(outbuf, (int) outlen));
         ns_free(outbuf);
         return TCL_OK;
+    }
+
+    if (!strcmp("deflate", Tcl_GetString(objv[1]))) {
+      inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
+      if (!(outbuf = Ns_ZlibDeflate(inbuf, inlen, &outlen))) {
+	Tcl_AppendResult(interp, "nszlib: deflate failed", 0);
+	return TCL_ERROR;
+      }
+      Tcl_SetObjResult(interp, Tcl_NewByteArrayObj(outbuf, (int) outlen));
+      ns_free(outbuf);
+      return TCL_OK;
     }
 
     if (!strcmp("uncompress", Tcl_GetString(objv[1]))) {
@@ -220,6 +232,18 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj * CONST objv[]
     return TCL_ERROR;
 }
 
+static voidpf
+ZAlloc(voidpf arg, uInt items, uInt size)
+{
+    return ns_calloc(items, size);
+}
+
+static void
+ZFree(voidpf arg, voidpf address)
+{
+    ns_free(address);
+}
+
 unsigned char *Ns_ZlibCompress(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen)
 {
     int rc;
@@ -243,6 +267,56 @@ unsigned char *Ns_ZlibCompress(unsigned char *inbuf, unsigned long inlen, unsign
     (*outlen) += 8;
     return outbuf;
 }
+
+unsigned char *Ns_ZlibDeflate(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen)
+{
+    unsigned char *outbuf;
+    z_stream zStream, *z = &zStream;
+    int      status;
+
+    z->zalloc = ZAlloc;
+    z->zfree = ZFree;
+    z->opaque = Z_NULL;
+    
+    status = deflateInit2(z,
+                          Z_BEST_COMPRESSION, /* to size memory, will be reset later */
+                          Z_DEFLATED, /* method. */
+                          15 + 16,    /* windowBits: 15 (max), +16 (Gzip header/footer). */
+                          9,          /* memlevel: 1-9 (min-max), default: 8.*/
+                          Z_DEFAULT_STRATEGY);
+    if (status != Z_OK) {
+        Ns_Log(Notice, "Ns_CompressInit: zlib error: %d (%s): %s",
+               status, zError(status), (z->msg != NULL) ? z->msg : "(none)");
+        // end
+        return NULL;
+    }
+
+    z->next_in = inbuf;
+    z->avail_in = inlen;
+    
+    *outlen = inlen * 1.1 + 20;
+    outbuf = ns_malloc(*outlen);
+
+    z->next_out = outbuf;
+    z->avail_out = *outlen;
+
+    status = deflate(z, Z_FINISH);
+
+    if (status != Z_OK && status != Z_STREAM_END) {
+        Ns_Log(Notice, "Ns_ZlibDeflate: zlib error: %d (%s): %s",
+               status, zError(status), (z->msg != NULL) ? z->msg : "(none)");
+        ns_free(outbuf);
+        outbuf = NULL;
+    }
+   
+    status = deflateEnd(z);
+    if (status != Z_OK && status != Z_STREAM_END) {
+        Ns_Log(Bug, "Ns_ZlibDeflate: deflateEnd: %d (%s): %s",
+               status, zError(status), (z->msg != NULL) ? z->msg : "(unknown)");
+    }
+    return outbuf;
+}
+
 
 unsigned char *Ns_ZlibUncompress(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen)
 {
@@ -268,3 +342,11 @@ unsigned char *Ns_ZlibUncompress(unsigned char *inbuf, unsigned long inlen, unsi
     }
     return outbuf;
 }
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 4
+ * fill-column: 78
+ * indent-tabs-mode: nil
+ * End:
+ */
