@@ -274,20 +274,20 @@ unsigned char *Ns_ZlibDeflate(unsigned char *inbuf, unsigned long inlen, unsigne
     z_stream zStream, *z = &zStream;
     int      status;
 
+    memset(z, 0, sizeof(z_stream));
     z->zalloc = ZAlloc;
     z->zfree = ZFree;
     z->opaque = Z_NULL;
     
     status = deflateInit2(z,
-                          Z_BEST_COMPRESSION, /* to size memory, will be reset later */
+                          Z_DEFAULT_COMPRESSION, /* to size memory, will be reset later */
                           Z_DEFLATED, /* method. */
-                          15 + 16,    /* windowBits: 15 (max), +16 (Gzip header/footer). */
+                          -15,        /* windowBits: -8 .. -15 for raw deflate */
                           9,          /* memlevel: 1-9 (min-max), default: 8.*/
                           Z_DEFAULT_STRATEGY);
     if (status != Z_OK) {
         Ns_Log(Notice, "Ns_CompressInit: zlib error: %d (%s): %s",
                status, zError(status), (z->msg != NULL) ? z->msg : "(none)");
-        // end
         return NULL;
     }
 
@@ -308,7 +308,8 @@ unsigned char *Ns_ZlibDeflate(unsigned char *inbuf, unsigned long inlen, unsigne
         ns_free(outbuf);
         outbuf = NULL;
     }
-   
+    *outlen = z->total_out;
+
     status = deflateEnd(z);
     if (status != Z_OK && status != Z_STREAM_END) {
         Ns_Log(Bug, "Ns_ZlibDeflate: deflateEnd: %d (%s): %s",
