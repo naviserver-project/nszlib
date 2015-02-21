@@ -10,7 +10,7 @@ MOD      =  nszlib.so
 #
 # Objects to build.
 #
-OBJS     = nszlib.o
+MODOBJS  = nszlib.o
 
 MODLIBS	 = -lz
 
