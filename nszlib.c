@@ -59,6 +59,7 @@
 #define NSZLIB_VERSION "1.1"
 
 NS_EXPORT int Ns_ModuleVersion = 1;
+NS_EXPORT Ns_ModuleInitProc Ns_ModuleInit;
 
 static Ns_TclTraceProc NsZlibInterpInit;
 static int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj * CONST objv[]);
@@ -68,7 +69,7 @@ unsigned char *Ns_ZlibUncompress(unsigned char *inbuf, unsigned long inlen, unsi
 unsigned char *Ns_ZlibDeflate(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
 unsigned char *Ns_ZlibInflate(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
 
-NS_EXPORT int Ns_ModuleInit(char *hServer, char *hModule)
+NS_EXPORT int Ns_ModuleInit(const char *hServer, const char *hModule)
 {
     Ns_Log(Notice, "nszlib: zlib module version %s started", NSZLIB_VERSION);
     Ns_TclRegisterTrace(hServer, NsZlibInterpInit, 0, NS_TCL_TRACE_CREATE);
