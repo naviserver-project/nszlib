@@ -62,7 +62,7 @@ NS_EXPORT int Ns_ModuleVersion = 1;
 NS_EXPORT Ns_ModuleInitProc Ns_ModuleInit;
 
 static Ns_TclTraceProc NsZlibInterpInit;
-static int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj * CONST objv[]);
+static Tcl_ObjCmdProc ZlibCmd;
 
 unsigned char *Ns_ZlibCompress(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
 unsigned char *Ns_ZlibUncompress(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
