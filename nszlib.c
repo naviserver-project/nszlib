@@ -1,4 +1,4 @@
-/* 
+/*
  * The contents of this file are subject to the Mozilla Public License
  * Version 1.1(the "License"); you may not use this file except in
  * compliance with the License. You may obtain a copy of the License at
@@ -20,7 +20,7 @@
  * version of this file under either the License or the GPL.
  *
  * Author Vlad Seryakov vlad@crystalballinc.com
- * 
+ *
  */
 
 /*
@@ -69,21 +69,21 @@ unsigned char *Ns_ZlibUncompress(unsigned char *inbuf, unsigned long inlen, unsi
 unsigned char *Ns_ZlibDeflate(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
 unsigned char *Ns_ZlibInflate(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
 
-NS_EXPORT int Ns_ModuleInit(const char *hServer, const char *hModule)
+NS_EXPORT int Ns_ModuleInit(const char *hServer, const char *UNUSED(hModule))
 {
     Ns_Log(Notice, "nszlib: zlib module version %s started", NSZLIB_VERSION);
     Ns_TclRegisterTrace(hServer, NsZlibInterpInit, 0, NS_TCL_TRACE_CREATE);
     return NS_OK;
 }
 
-static int NsZlibInterpInit(Tcl_Interp * interp, const void *context)
+static int NsZlibInterpInit(Tcl_Interp * interp, const void *UNUSED(context))
 {
     Tcl_CreateObjCommand(interp, "ns_zlib", ZlibCmd, NULL, NULL);
     return NS_OK;
 }
 
 static
-int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
+int ZlibCmd(void *UNUSED(context), Tcl_Interp * interp, int objc, Tcl_Obj *const* objv)
 {
     int result = TCL_OK, inlen, opt, rc;
     unsigned char *inbuf, *outbuf = NULL;
@@ -98,11 +98,11 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
         CGunzipIdx, CInflateIdx, CUncompressIdx
     };
 
-    if (Tcl_GetIndexFromObj(interp, objv[1], opts, 
+    if (Tcl_GetIndexFromObj(interp, objv[1], opts,
                             "option", 0, &opt) != TCL_OK) {
         return TCL_ERROR;
     }
-    
+
     if (objc < 3) {
         Tcl_AppendResult(interp, "wrong # args: should be \"", Tcl_GetString(objv[0]), " command args\"", NULL);
         return TCL_ERROR;
@@ -112,7 +112,7 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
 
     case CCompressIdx:
         inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
-        outbuf = Ns_ZlibCompress(inbuf, inlen, &outlen);
+        outbuf = Ns_ZlibCompress(inbuf, (unsigned long)inlen, &outlen);
         if (outbuf == NULL) {
             Tcl_AppendResult(interp, "nszlib: compress failed", 0);
             result = TCL_ERROR;
@@ -123,7 +123,7 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
 
     case CDeflateIdx:
         inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
-        outbuf = Ns_ZlibDeflate(inbuf, inlen, &outlen);
+        outbuf = Ns_ZlibDeflate(inbuf, (unsigned long)inlen, &outlen);
         if (outbuf == NULL) {
             Tcl_AppendResult(interp, "nszlib: deflate failed", 0);
             result = TCL_ERROR;
@@ -131,10 +131,10 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
             Tcl_SetObjResult(interp, Tcl_NewByteArrayObj(outbuf, (int) outlen));
         }
         break;
-        
+
     case CUncompressIdx:
         inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
-        outbuf = Ns_ZlibUncompress(inbuf, inlen, &outlen);
+        outbuf = Ns_ZlibUncompress(inbuf, (unsigned long)inlen, &outlen);
         if (outbuf == NULL) {
             Tcl_AppendResult(interp, "nszlib: uncompress failed", 0);
             result = TCL_ERROR;
@@ -145,7 +145,7 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
 
     case CInflateIdx:
         inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
-        outbuf = Ns_ZlibInflate(inbuf, inlen, &outlen);
+        outbuf = Ns_ZlibInflate(inbuf, (unsigned long)inlen, &outlen);
         if (outbuf == NULL) {
             Tcl_AppendResult(interp, "nszlib: inflate failed", 0);
             result = TCL_ERROR;
@@ -154,15 +154,15 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
         }
         break;
 
-        
+
     case CGzipIdx:
         inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
-        outlen = inlen * 1.1 + 30;
+        outlen = (unsigned long)(inlen * 1.1 + 30);
         outbuf = ns_malloc(outlen);
         outlen = outlen - 16;
-        rc = compress2(outbuf + 8, &outlen, inbuf, inlen, 3);
+        rc = compress2(outbuf + 8, &outlen, inbuf, (unsigned long)inlen, 3);
         if (rc != Z_OK) {
-	    sprintf((char *) outbuf, "%d", rc);
+            sprintf((char *) outbuf, "%d", rc);
             Tcl_AppendResult(interp, "nszlib: gzip failed ", outbuf, 0);
             result = TCL_ERROR;
         } else {
@@ -170,7 +170,7 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
             /* Gzip header */
             memcpy(outbuf, "\037\213\010\000\000\000\000\000\000\003", 10);
             crc = crc32(0, Z_NULL, 0);
-            crc = crc32(crc, inbuf, inlen);
+            crc = crc32(crc, inbuf, (unsigned int)inlen);
             outlen += 4;
             *(unsigned char *) (outbuf + outlen + 0) = (crc & 0x000000ff);
             *(unsigned char *) (outbuf + outlen + 1) = (crc & 0x0000ff00) >> 8;
@@ -179,7 +179,7 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
             *(unsigned char *) (outbuf + outlen + 4) = (inlen & 0x000000ff);
             *(unsigned char *) (outbuf + outlen + 5) = (inlen & 0x0000ff00) >> 8;
             *(unsigned char *) (outbuf + outlen + 6) = (inlen & 0x00ff0000) >> 16;
-            *(unsigned char *) (outbuf + outlen + 7) = (inlen & 0xff000000) >> 24;
+            *(unsigned char *) (outbuf + outlen + 7) = ((unsigned int)inlen & 0xff000000) >> 24;
             outlen += 8;
             Tcl_SetObjResult(interp, Tcl_NewByteArrayObj(outbuf, (int) outlen));
         }
@@ -189,7 +189,7 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
         Tcl_Obj *obj;
         char buf[32768];
         gzFile gin = gzopen(Tcl_GetString(objv[2]), "rb");
-        
+
         if (!gin) {
             Tcl_AppendResult(interp, "nszlib: gunzip: cannot open ", Tcl_GetString(objv[2]), 0);
             result = TCL_ERROR;
@@ -228,11 +228,11 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
         if (!(gout = gzopen(Tcl_GetString(obj), "wb"))) {
             Tcl_AppendResult(interp, "nszlib: gzipfile: cannot create ", Tcl_GetString(obj), 0);
             Tcl_DecrRefCount(obj);
-	    fclose(fin);
+            fclose(fin);
             return TCL_ERROR;
         }
         for (;;) {
-            if (!(inlen = fread(buf, 1, sizeof(buf), fin)))
+            if (!(inlen = (int)fread(buf, 1, sizeof(buf), fin)))
                 break;
             if (ferror(fin)) {
                 Tcl_AppendResult(interp, "nszlib: gzipfile: read error ", strerror(errno), 0);
@@ -242,7 +242,7 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
                 Tcl_DecrRefCount(obj);
                 return TCL_ERROR;
             }
-            if (gzwrite(gout, buf, inlen) != inlen) {
+            if (gzwrite(gout, buf, (unsigned int)inlen) != inlen) {
                 Tcl_AppendResult(interp, "nszlib: gunzip: write error ", gzerror(gout, &rc), 0);
                 fclose(fin);
                 gzclose(gout);
@@ -266,13 +266,13 @@ int ZlibCmd(void *context, Tcl_Interp * interp, int objc, Tcl_Obj *CONST* objv)
 }
 
 static voidpf
-ZAlloc(voidpf arg, uInt items, uInt size)
+ZAlloc(voidpf UNUSED(arg), uInt items, uInt size)
 {
     return ns_calloc(items, size);
 }
 
 static void
-ZFree(voidpf arg, voidpf address)
+ZFree(voidpf UNUSED(arg), voidpf address)
 {
     ns_free(address);
 }
@@ -283,7 +283,7 @@ unsigned char *Ns_ZlibCompress(unsigned char *inbuf, unsigned long inlen, unsign
     unsigned long crc;
     unsigned char *outbuf;
 
-    *outlen = inlen * 1.1 + 20;
+    *outlen = (unsigned long)(inlen * 1.1 + 20);
     outbuf = ns_malloc(*outlen);
     *outlen = (*outlen) - 8;
     rc = compress2(outbuf, outlen, inbuf, inlen, 3);
@@ -292,7 +292,7 @@ unsigned char *Ns_ZlibCompress(unsigned char *inbuf, unsigned long inlen, unsign
         ns_free(outbuf);
         return 0;
     }
-    crc = crc32(crc32(0, Z_NULL, 0), inbuf, inlen);
+    crc = crc32(crc32(0, Z_NULL, 0), inbuf, (unsigned int)inlen);
     crc = htonl(crc);
     inlen = htonl(inlen);
     memcpy(outbuf + (*outlen), &crc, 4);
@@ -311,7 +311,7 @@ unsigned char *Ns_ZlibDeflate(unsigned char *inbuf, unsigned long inlen, unsigne
     z->zalloc = ZAlloc;
     z->zfree = ZFree;
     z->opaque = Z_NULL;
-    
+
     status = deflateInit2(z,
                           Z_DEFAULT_COMPRESSION, /* to size memory, will be reset later */
                           Z_DEFLATED, /* method. */
@@ -325,13 +325,13 @@ unsigned char *Ns_ZlibDeflate(unsigned char *inbuf, unsigned long inlen, unsigne
     }
 
     z->next_in = inbuf;
-    z->avail_in = inlen;
-    
-    *outlen = inlen * 1.1 + 20;
+    z->avail_in = (unsigned int)inlen;
+
+    *outlen = (unsigned long)(inlen * 1.1 + 20);
     outbuf = ns_malloc(*outlen);
 
     z->next_out = outbuf;
-    z->avail_out = *outlen;
+    z->avail_out = (unsigned int)*outlen;
 
     status = deflate(z, Z_FINISH);
 
@@ -361,7 +361,7 @@ unsigned char *Ns_ZlibInflate(unsigned char *inbuf, unsigned long inlen, unsigne
     z->zalloc = ZAlloc;
     z->zfree = ZFree;
     z->opaque = Z_NULL;
-    
+
     status = inflateInit2(z, -15 /* windowBits: -8 .. -15 for "raw deflate" */);
     if (status != Z_OK) {
         Ns_Log(Notice, "Ns_ZlibInflate: zlib error: %d (%s): %s",
@@ -370,13 +370,13 @@ unsigned char *Ns_ZlibInflate(unsigned char *inbuf, unsigned long inlen, unsigne
     }
 
     z->next_in = inbuf;
-    z->avail_in = inlen;
-    
+    z->avail_in = (unsigned int)inlen;
+
     *outlen = inlen * 6;
     outbuf = ns_malloc(*outlen);
 
     z->next_out = outbuf;
-    z->avail_out = *outlen;
+    z->avail_out = (unsigned int)*outlen;
 
     while (1) {
         status = inflate(z, Z_NO_FLUSH);
@@ -387,7 +387,7 @@ unsigned char *Ns_ZlibInflate(unsigned char *inbuf, unsigned long inlen, unsigne
             return NULL;
         }
         if (z->avail_out == 0) {
-            long oldSize = *outlen;
+            unsigned int oldSize = (unsigned int)*outlen;
             /*
              * double size in case we need more.
              */
@@ -397,7 +397,7 @@ unsigned char *Ns_ZlibInflate(unsigned char *inbuf, unsigned long inlen, unsigne
             z->next_out = outbuf + oldSize;
         } else {
             *outlen = z->total_out;
-            break;    
+            break;
         }
     }
 
@@ -427,7 +427,7 @@ unsigned char *Ns_ZlibUncompress(unsigned char *inbuf, unsigned long inlen, unsi
     }
     memcpy(&crc, &inbuf[inlen - 8], 4);
     crc = ntohl(crc);
-    if (crc != crc32(crc32(0, Z_NULL, 0), outbuf, *outlen)) {
+    if (crc != crc32(crc32(0, Z_NULL, 0), outbuf, (unsigned int)*outlen)) {
         Ns_Log(Error, "Ns_ZlibUncompress: crc mismatch");
         ns_free(outbuf);
         return 0;
