@@ -69,14 +69,14 @@ unsigned char *Ns_ZlibUncompress(unsigned char *inbuf, unsigned long inlen, unsi
 unsigned char *Ns_ZlibDeflate(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
 unsigned char *Ns_ZlibInflate(unsigned char *inbuf, unsigned long inlen, unsigned long *outlen);
 
-NS_EXPORT int Ns_ModuleInit(const char *hServer, const char *UNUSED(hModule))
+NS_EXPORT Ns_ReturnCode Ns_ModuleInit(const char *hServer, const char *UNUSED(hModule))
 {
     Ns_Log(Notice, "nszlib: zlib module version %s started", NSZLIB_VERSION);
     Ns_TclRegisterTrace(hServer, NsZlibInterpInit, 0, NS_TCL_TRACE_CREATE);
     return NS_OK;
 }
 
-static int NsZlibInterpInit(Tcl_Interp * interp, const void *UNUSED(context))
+static Ns_ReturnCode NsZlibInterpInit(Tcl_Interp * interp, const void *UNUSED(context))
 {
     Tcl_CreateObjCommand(interp, "ns_zlib", ZlibCmd, NULL, NULL);
     return NS_OK;
