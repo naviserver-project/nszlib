@@ -11,7 +11,7 @@ set gzip [ns_zlib gzip $test]
 
 # Save as gzip file
 set fd [open /tmp/test.gz w]
-fconfigure $fd -translation binary -encoding binary
+fconfigure $fd -translation binary
 puts -nonewline $fd $gzip
 close $fd
 
