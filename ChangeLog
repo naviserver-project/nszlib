@@ -1,0 +1,102 @@
+commit 58f66cc12a51a5fc743fc6a7c683151d03f59aa8
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2024-12-30
+
+    Improved Tcl9 compatibility
+
+M	example.tcl
+
+commit ebada95a9562f364b517dbd9851ae23502b3b502
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2021-07-23
+
+    modernize code
+
+M	nszlib.c
+
+commit 9ac425baf3cff1e010db87506059d9988c3ee08f
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2019-06-13
+
+    make code compile cleanly
+
+M	nszlib.c
+
+commit efc6be12f54232609f650494b9ca8924aa935da2
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2016-04-13
+
+    - use type Ns_TclTraceProc for functions registered voa Ns_TclRegisterTrace()
+    - use type Tcl_ObjCmdProc for Tcl objcmds
+
+M	nszlib.c
+
+commit 7e85bd8331d689f8ee2bc48b4b8f914edad8fef5
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2016-04-13
+
+    - use typedef Ns_ModuleInitProc for Ns_ModuleInit()
+
+M	nszlib.c
+
+commit 4b4d2c7b899cfce0af2c6f06e2184fb8c7d838f4
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2015-02-21
+
+    - use documented MODOBJS instead of older-style OBJS in Makefiles
+
+M	Makefile
+
+commit bc3b966d9aa99defbef3e8113d936df6496cc620
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2015-01-20
+
+    - modernize definition of obj command
+    - added subcommand inflate
+
+M	README
+M	nszlib.c
+
+commit 4ae6ff68c546aa559045f6f311063917fd8fa697
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2015-01-20
+
+    - make function compatible with php
+
+M	nszlib.c
+
+commit 75c9cb250f38f89bb09c7da129ef0f64b4651c99
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2015-01-20
+
+    - adding experimental subcommand deflate
+
+M	nszlib.c
+
+commit 5068bf17a7f385d30f17b790fc90a9ee21d2b0c7
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2015-01-19
+
+    - adjust to actual prototypes
+
+M	nszlib.c
+
+commit dfa02776a9318afcf2b5778bbbd9f7a334d67aff
+Author: Gustaf Neumann <neumann@wu-wien.ac.at>
+Date:   2014-05-02
+
+    Some cleanup
+
+M	nszlib.c
+
+commit 6c389325fdd0d55a4cdedaee063e1a192c2212fe
+Author: Vlad Seryakov <vseryakov@gmail.com>
+Date:   2009-03-10
+
+    initial import
+
+A	LICENSE
+A	Makefile
+A	README
+A	example.tcl
+A	nszlib.c

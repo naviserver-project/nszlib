@@ -87,7 +87,7 @@ int ZlibCmd(void *UNUSED(context), Tcl_Interp * interp, int objc, Tcl_Obj *const
     int result = TCL_OK, opt, rc;
     unsigned char *inbuf, *outbuf = NULL;
     unsigned long outlen;
-    Tcl_Size inlen;
+    TCL_SIZE_T    inlen;
 
     static const char *opts[] = {
         "compress", "deflate", "gzip", "gzipfile",
