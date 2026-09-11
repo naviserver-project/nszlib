@@ -51,7 +51,6 @@
  *     Vlad Seryakov vlad@crystalballinc.com
  */
 
-#define USE_TCL8X
 #include "ns.h"
 
 #include "zlib.h"
@@ -85,9 +84,10 @@ static Ns_ReturnCode NsZlibInterpInit(Tcl_Interp * interp, const void *UNUSED(co
 static
 int ZlibCmd(void *UNUSED(context), Tcl_Interp * interp, int objc, Tcl_Obj *const* objv)
 {
-    int result = TCL_OK, inlen, opt, rc;
+    int result = TCL_OK, opt, rc;
     unsigned char *inbuf, *outbuf = NULL;
     unsigned long outlen;
+    Tcl_Size inlen;
 
     static const char *opts[] = {
         "compress", "deflate", "gzip", "gzipfile",
@@ -111,7 +111,7 @@ int ZlibCmd(void *UNUSED(context), Tcl_Interp * interp, int objc, Tcl_Obj *const
     switch (opt) {
 
     case CCompressIdx:
-        inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
+        inbuf = Tcl_GetByteArrayFromObj(objv[2], &inlen);
         outbuf = Ns_ZlibCompress(inbuf, (unsigned long)inlen, &outlen);
         if (outbuf == NULL) {
             Tcl_AppendResult(interp, "nszlib: compress failed", 0);
@@ -122,7 +122,7 @@ int ZlibCmd(void *UNUSED(context), Tcl_Interp * interp, int objc, Tcl_Obj *const
         break;
 
     case CDeflateIdx:
-        inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
+        inbuf = Tcl_GetByteArrayFromObj(objv[2], &inlen);
         outbuf = Ns_ZlibDeflate(inbuf, (unsigned long)inlen, &outlen);
         if (outbuf == NULL) {
             Tcl_AppendResult(interp, "nszlib: deflate failed", 0);
@@ -133,7 +133,7 @@ int ZlibCmd(void *UNUSED(context), Tcl_Interp * interp, int objc, Tcl_Obj *const
         break;
 
     case CUncompressIdx:
-        inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
+        inbuf = Tcl_GetByteArrayFromObj(objv[2], &inlen);
         outbuf = Ns_ZlibUncompress(inbuf, (unsigned long)inlen, &outlen);
         if (outbuf == NULL) {
             Tcl_AppendResult(interp, "nszlib: uncompress failed", 0);
@@ -144,7 +144,7 @@ int ZlibCmd(void *UNUSED(context), Tcl_Interp * interp, int objc, Tcl_Obj *const
         break;
 
     case CInflateIdx:
-        inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
+        inbuf = Tcl_GetByteArrayFromObj(objv[2], &inlen);
         outbuf = Ns_ZlibInflate(inbuf, (unsigned long)inlen, &outlen);
         if (outbuf == NULL) {
             Tcl_AppendResult(interp, "nszlib: inflate failed", 0);
@@ -156,7 +156,7 @@ int ZlibCmd(void *UNUSED(context), Tcl_Interp * interp, int objc, Tcl_Obj *const
 
 
     case CGzipIdx:
-        inbuf = Tcl_GetByteArrayFromObj(objv[2], (int *) &inlen);
+        inbuf = Tcl_GetByteArrayFromObj(objv[2], &inlen);
         outlen = (unsigned long)(inlen * 1.1 + 30);
         outbuf = ns_malloc(outlen);
         outlen = outlen - 16;
